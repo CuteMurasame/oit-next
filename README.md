@@ -1,3 +1,12 @@
+# OI-Trainer - CQYC Version
+
+添加了一些 CQYC 选手的名称，以及一些自定义的字段。
+
+如果希望移除名字，可以通过 `oracynx@gmail.com` 或 <https://t.me/Oracynx> 取得联系。
+
+下面是原 `README.md`。
+
+---
 
 # OItrainer — 信息学教练模拟器
 
