@@ -1162,7 +1162,7 @@ function initGameUI(){
   showModal(`<h3>欢迎 — OI 教练模拟器</h3>
     <label class="block">选择难度</label><select id="init-diff"><option value="1">简单</option><option value="2" selected>普通</option><option value="3">困难</option></select>
     <label class="block">选择省份</label><div id="init-prov-grid" class="prov-grid"></div>
-    <label class="block">学生人数 (3-10)</label><input id="init-stu" type="number" min="3" max="10" value="5" />
+    <label class="block">学生人数 (1-32)</label><input id="init-stu" type="number" min="1" max="32" value="5" />
   <div class="modal-actions" style="margin-top:8px"><button class="btn btn-ghost" onclick="closeModal()">取消</button><button class="btn" id="init-start">开始</button></div>`);
   let grid = document.getElementById('init-prov-grid');
   for(let k in PROVINCES){ let p=PROVINCES[k]; let btn=document.createElement('button'); btn.className='prov-btn'; btn.textContent=p.name; btn.dataset.val=k; btn.onclick=()=>{document.querySelectorAll('#init-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');}; grid.appendChild(btn);}  
@@ -1170,7 +1170,7 @@ function initGameUI(){
   $('init-start').onclick = ()=>{
     let diff = parseInt($('init-diff').value);
     let prov = parseInt(document.querySelector('#init-prov-grid .prov-btn.selected').dataset.val);
-    let count = clampInt(parseInt($('init-stu').value),3,10);
+    let count = clampInt(parseInt($('init-stu').value), 1, 32);
     closeModal();
     initGame(diff,prov,count);
     renderAll();
