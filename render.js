@@ -1791,6 +1791,9 @@ function outingTrainingUI() {
         </h4>
         <div class="collapsible-content" style="margin-top:8px">
           <div class="small muted" style="margin-bottom:8px">每选择一个激发天赋消耗 ¥12,000，参加集训的学生有 30% 概率获得该天赋</div>
+          <div style="margin-bottom:8px">
+            <button class="btn" id="out-select-all-positive-talents" style="font-size:12px;padding:4px 8px;margin-bottom:6px;width:140px;">全选正面天赋</button>
+          </div>
           <div id="out-talent-grid" class="talent-grid" style="max-height:200px;overflow:auto"></div>
         </div>
       </div>
@@ -1872,6 +1875,31 @@ function outingTrainingUI() {
         } else {
           arrow.style.transform = 'rotate(180deg)';
         }
+      };
+    }
+
+    // Add event listener for "Select All Positive Talents" button
+    const selectAllPositiveBtn = document.getElementById('out-select-all-positive-talents');
+    if (selectAllPositiveBtn) {
+      selectAllPositiveBtn.onclick = () => {
+        const talentCards = Array.from(document.querySelectorAll('#out-talent-grid .talent-card'));
+        
+        talentCards.forEach(card => {
+          const talentName = card.dataset.talent;
+          const talentInfo = window.TalentManager ? window.TalentManager.getTalent(talentName) : null;
+          
+          // Use the talent classification system: select positive talents, deselect negative ones
+          if (talentInfo && talentInfo.beneficial === true) {
+            card.dataset.selected = '1';
+            card.style.opacity = '1.0';
+          } else {
+            // For negative talents, deselect them
+            card.dataset.selected = '0';
+            card.style.opacity = '0.5';
+          }
+        });
+        
+        updateOutingCostPreview();
       };
     }
     
