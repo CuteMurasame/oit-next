@@ -1113,55 +1113,6 @@
         if (!isSimulator)
         {
             console.log('未检测到OI教练模拟器，开发者工具未启用');
-
-            // 即使检测失败也创建按钮，但显示为红色
-            const devButton = createDevButton();
-            devButton.innerHTML = '🔧 Dev (未检测)';
-            devButton.style.background = '#f44336';
-            devButton.addEventListener('mouseenter', () =>
-            {
-                devButton.style.background = '#d32f2f';
-            });
-            devButton.addEventListener('mouseleave', () =>
-            {
-                devButton.style.background = '#f44336';
-            });
-
-            document.body.appendChild(devButton);
-
-            let devTools = null;
-            devButton.addEventListener('click', () =>
-            {
-                if (!devTools)
-                {
-                    devTools = new OIDevTools();
-                }
-                devTools.toggle();
-            });
-
-            // 添加调试提示
-            const hint = document.createElement('div');
-            hint.innerHTML = '⚠️ 开发者工具 (强制模式)';
-            hint.style.cssText = `
-                position: fixed;
-                top: 50px;
-                left: 10px;
-                background: #FF9800;
-                color: white;
-                padding: 5px 10px;
-                border-radius: 4px;
-                font-size: 12px;
-                z-index: 9997;
-                opacity: 0.9;
-            `;
-            document.body.appendChild(hint);
-
-            // 3秒后自动隐藏提示
-            setTimeout(() =>
-            {
-                hint.style.opacity = '0.3';
-            }, 3000);
-
             return;
         }
 
@@ -1182,29 +1133,6 @@
             }
             devTools.toggle();
         });
-
-        // 添加启用提示（简化版）
-        const hint = document.createElement('div');
-        hint.innerHTML = '🔧 开发者工具已启用';
-        hint.style.cssText = `
-            position: fixed;
-            top: 50px;
-            left: 10px;
-            background: #4CAF50;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 9997;
-            opacity: 0.9;
-        `;
-        document.body.appendChild(hint);
-
-        // 3秒后自动隐藏提示
-        setTimeout(() =>
-        {
-            hint.style.opacity = '0.3';
-        }, 3000);
     }
 
     // 等待DOM加载完成后初始化
