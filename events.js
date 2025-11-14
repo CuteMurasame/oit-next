@@ -138,7 +138,7 @@
                   quitList.push(s.name);
                   c.game.students.splice(i, 1);
                   c.game.quit_students = (c.game.quit_students||0) + 1;
-                  c.game.reputation = Math.max(0, c.game.reputation - 10);
+                  c.game.reputation = c.game.reputation - 10;
                   try{ if(typeof s.triggerTalents === 'function'){ s.triggerTalents('quit', { reason: 'burnout' }); } }catch(e){ console.error('triggerTalents quit', e); }
                 }
               } else if(s.quit_tendency_weeks === 1) {
@@ -488,7 +488,7 @@
               }
             },
             { label: '婉拒邀请', effect: () => { 
-                c.game.reputation = Math.max(0, c.game.reputation - 1);
+              c.game.reputation = c.game.reputation;
                 const desc = `婉拒友校交流：声誉 -1`;
                 window.pushEvent && window.pushEvent({ name: '选择结果', description: desc, week: c.game.week });
               }
@@ -657,7 +657,7 @@
                 }
                 // give a modest monetary boost scaled by reputation
                 const baseGain = c.utils.uniformInt(2000, 8000);
-                const rep = (c.game && typeof c.game.reputation === 'number') ? Math.max(0, Math.min(100, c.game.reputation)) : 0;
+              const rep = (c.game && typeof c.game.reputation === 'number') ? Math.min(100, c.game.reputation) : 0;
                 const repBonus = (typeof MEDIA_REP_BONUS !== 'undefined') ? MEDIA_REP_BONUS : 0.4;
                 const gain = Math.round(baseGain * (1.0 + (rep / 100.0) * repBonus));
                 c.game.budget = (c.game.budget || 0) + gain;
@@ -688,7 +688,7 @@
             { label: '参加', effect: () => {
                 // commercial activity income scales with reputation: more rep -> higher payout
                 const baseGain = c.utils.uniformInt(20000, 50000);
-                const rep = (c.game && typeof c.game.reputation === 'number') ? Math.max(0, Math.min(100, c.game.reputation)) : 0;
+              const rep = (c.game && typeof c.game.reputation === 'number') ? Math.min(100, c.game.reputation) : 0;
                 const repBonus = (typeof COMMERCIAL_REP_BONUS !== 'undefined') ? COMMERCIAL_REP_BONUS : 0.5;
                 const gain = Math.round(baseGain * (1.0 + (rep / 100.0) * repBonus));
                 c.game.budget += gain;
@@ -781,7 +781,7 @@
             const cost = Math.round(20000 + (abilityAvg/100.0) * 10000); // 50k - 100k
 
             // retention success probability depends on reputation and student's mental
-            const rep = (c.game && typeof c.game.reputation === 'number') ? Math.max(0, Math.min(100, c.game.reputation)) : 50;
+            const rep = (c.game && typeof c.game.reputation === 'number') ? Math.min(100, c.game.reputation) : 50;
             const mental = Number(stud.mental || 50);
             let base = 0.25; // base chance
             const repFactor = (rep / 100.0) * 0.5; // up to +0.5
@@ -814,7 +814,7 @@
                       if(c.game.students[i] && c.game.students[i].name === stud.name){ c.game.students.splice(i,1); break; }
                     }
                     c.game.quit_students = (c.game.quit_students || 0) + 1;
-                    c.game.reputation = Math.max(0, (c.game.reputation || 0) - 20);
+                    c.game.reputation = (c.game.reputation || 0) - 20;
                     for(const s of c.game.students){ 
                       if(!s || s.active === false) continue; 
                       // 使用 modifier
