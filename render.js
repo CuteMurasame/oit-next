@@ -1779,6 +1779,9 @@ function outingTrainingUI() {
       <label class="block">地点</label>
       <div id="out-prov-grid" class="prov-grid"></div>
       <label class="block">选择学生（点击卡片选择参加）</label>
+      <div style="margin-bottom:8px">
+        <button class="btn" id="out-select-all" style="font-size:12px;padding:4px 8px;margin-bottom:6px;width:80px;">全选</button>
+      </div>
       <div id="out-student-grid" class="student-grid" style="max-height:180px;overflow:auto;border:1px solid #eee;padding:6px;margin-bottom:8px"></div>
       
       <div class="talent-inspire-panel collapsible collapsed" style="margin-top:12px;margin-bottom:12px;padding:10px;border:1px solid #e2e8f0;border-radius:6px;background:#f7fafc">
@@ -1926,6 +1929,30 @@ function outingTrainingUI() {
       };
       outStudentGrid.appendChild(card);
     });
+    // 全选按钮功能
+    const selectAllBtn = document.getElementById('out-select-all');
+    if (selectAllBtn) {
+      selectAllBtn.onclick = () => {
+        const studentCards = Array.from(document.querySelectorAll('#out-student-grid .student-card'));
+        const allSelected = studentCards.every(card => card.dataset.selected === '1');
+        
+        // 切换选择状态：如果全部已选中则取消全选，否则全选
+        studentCards.forEach(card => {
+          if (allSelected) {
+            card.dataset.selected = '0';
+            card.style.opacity = '0.45';
+          } else {
+            card.dataset.selected = '1';
+            card.style.opacity = '1.0';
+          }
+        });
+        
+        // 更新按钮文本
+        selectAllBtn.textContent = allSelected ? '全选' : '取消全选';
+        updateOutingCostPreview();
+      };
+    }
+
     function updateOutingCostPreview(){
       const selectedCount = Array.from(document.querySelectorAll('#out-student-grid .student-card')).filter(c=>c.dataset.selected==='1').length || 0;
       const d = parseInt($('out-diff').value);
