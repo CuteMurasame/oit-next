@@ -577,8 +577,16 @@
             const students = window.game?.students;
             if (students && students[index])
             {
-                students[index][field] = value;
-                this.showNotification(`已更新 ${students[index].name} 的 ${field}`);
+                // 如果修改的是姓名，需要处理晋级状态的数据同步
+                if (field === 'name') {
+                    const oldName = students[index].name; // 保存旧姓名
+                    students[index][field] = value;
+                    this.updateQualificationNames(oldName, value); // 更新晋级状态中的姓名
+                    this.showNotification(`已更新学生姓名从 "${oldName}" 到 "${value}"`);
+                } else {
+                    students[index][field] = value;
+                    this.showNotification(`已更新 ${students[index].name} 的 ${field}`);
+                }
                 
                 // 刷新游戏UI
                 if (typeof window.renderAll === 'function') {
@@ -1042,6 +1050,84 @@
                     notification.parentNode.removeChild(notification);
                 }
             }, 3000);
+        }
+
+        // 更新晋级状态中的学生姓名
+        updateQualificationNames(oldName, newName)
+        {
+            const game = window.game;
+            if (!game || !game.qualification) return;
+
+            // 遍历所有赛季和比赛，更新晋级状态中的姓名
+            for (const seasonIndex in game.qualification)
+            {
+                const season = game.qualification[seasonIndex];
+                for (const compName in season)
+                {
+                    const qualifiedSet = season[compName];
+                    if (qualifiedSet.has(oldName))
+                    {
+                        qualifiedSet.delete(oldName);
+                        qualifiedSet.add(newName);
+                        console.log(`[晋级状态更新] 赛季${seasonIndex} ${compName}: "${oldName}" → "${newName}"`);
+                    }
+                }
+            }
+
+            // 同时更新国家集训队相关数据
+            if (game.nationalTeamResults)
+            {
+                // 更新CTT成绩
+                if (game.nationalTeamResults.cttScores)
+                {
+                    game.nationalTeamResults.cttScores.forEach(score => 
+                    {
+                        if (score.studentName === oldName)
+                        {
+                            score.studentName = newName;
+                        }
+                    });
+                }
+
+                // 更新CTS成绩
+                if (game.nationalTeamResults.ctsScores)
+                {
+                    game.nationalTeamResults.ctsScores.forEach(score => 
+                    {
+                        if (score.studentName === oldName)
+                        {
+                            score.studentName = newName;
+                        }
+                    });
+                }
+
+                // 更新IOI晋级名单
+                if (game.nationalTeamResults.ioiQualified)
+                {
+                    const index = game.nationalTeamResults.ioiQualified.indexOf(oldName);
+                    if (index !== -1)
+                    {
+                        game.nationalTeamResults.ioiQualified[index] = newName;
+                    }
+                }
+            }
+
+            // 更新职业生涯记录
+            if (game.careerCompetitions)
+            {
+                game.careerCompetitions.forEach(comp => 
+                {
+                    comp.entries.forEach(entry => 
+                    {
+                        if (entry.name === oldName)
+                        {
+                            entry.name = newName;
+                        }
+                    });
+                });
+            }
+
+            this.showNotification(`已同步晋级状态数据: "${oldName}" → "${newName}"`);
         }
 
         show()
