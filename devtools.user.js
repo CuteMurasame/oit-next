@@ -112,7 +112,6 @@
                 '<div class="tab-button ' + talentsActive + '" data-tab="talents">天赋管理</div>' +
                 '<div class="tab-button ' + advancedActive + '" data-tab="advanced">高级功能</div>' +
                 '<div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">' +
-                '<button id="save-game" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #4CAF50; color: white; border: none; border-radius: 4px;">保存游戏</button>' +
                 '<button id="close-panel" style="width: 100%; padding: 8px; background: #f44336; color: white; border: none; border-radius: 4px;">关闭面板</button>' +
                 '</div>' +
                 '</div>' +
@@ -156,7 +155,6 @@
                 '<thead>' +
                 '<tr style="background: #f0f0f0;">' +
                 '<th style="padding: 8px; border: 1px solid #ddd;">姓名</th>' +
-                '<th style="padding: 8px; border: 1px solid #ddd;">能力</th>' +
                 '<th style="padding: 8px; border: 1px solid #ddd;">思维</th>' +
                 '<th style="padding: 8px; border: 1px solid #ddd;">编码</th>' +
                 '<th style="padding: 8px; border: 1px solid #ddd;">压力</th>' +
@@ -181,19 +179,16 @@
                 '<input type="text" value="' + (student.name || '') + '" data-index="' + index + '" data-field="name" style="width: 100%; padding: 4px;">' +
                 '</td>' +
                 '<td style="padding: 8px; border: 1px solid #ddd;">' +
-                '<input type="number" value="' + (student.ability || 0) + '" data-index="' + index + '" data-field="ability" style="width: 60px; padding: 4px;">' +
+                '<input type="number" step="1" value="' + Math.round(student.thinking || 0) + '" data-index="' + index + '" data-field="thinking" style="width: 60px; padding: 4px;">' +
                 '</td>' +
                 '<td style="padding: 8px; border: 1px solid #ddd;">' +
-                '<input type="number" value="' + (student.thinking || 0) + '" data-index="' + index + '" data-field="thinking" style="width: 60px; padding: 4px;">' +
+                '<input type="number" step="1" value="' + Math.round(student.coding || 0) + '" data-index="' + index + '" data-field="coding" style="width: 60px; padding: 4px;">' +
                 '</td>' +
                 '<td style="padding: 8px; border: 1px solid #ddd;">' +
-                '<input type="number" value="' + (student.coding || 0) + '" data-index="' + index + '" data-field="coding" style="width: 60px; padding: 4px;">' +
+                '<input type="number" step="1" value="' + Math.round(student.pressure || 0) + '" data-index="' + index + '" data-field="pressure" style="width: 60px; padding: 4px;">' +
                 '</td>' +
                 '<td style="padding: 8px; border: 1px solid #ddd;">' +
-                '<input type="number" value="' + (student.pressure || 0) + '" data-index="' + index + '" data-field="pressure" style="width: 60px; padding: 4px;">' +
-                '</td>' +
-                '<td style="padding: 8px; border: 1px solid #ddd;">' +
-                '<input type="number" value="' + (student.mental || 0) + '" data-index="' + index + '" data-field="mental" style="width: 60px; padding: 4px;">' +
+                '<input type="number" step="1" value="' + Math.round(student.mental || 0) + '" data-index="' + index + '" data-field="mental" style="width: 60px; padding: 4px;">' +
                 '</td>' +
                 '<td style="padding: 8px; border: 1px solid #ddd;">' +
                 '<select data-index="' + index + '" data-field="active" style="padding: 4px;">' +
@@ -227,7 +222,7 @@
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label style="display: block; margin-bottom: 5px;">声誉:</label>
-                            <input type="number" id="game-reputation" value="${game.reputation || 0}" min="0" max="100" style="width: 100px; padding: 8px;">
+                            <input type="number" id="game-reputation" value="${game.reputation || 0}" style="width: 100px; padding: 8px;">
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label style="display: block; margin-bottom: 5px;">省份类型:</label>
@@ -245,9 +240,6 @@
                         <button id="next-week" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #FF9800; color: white; border: none; border-radius: 4px;">下一周</button>
                         <button id="reset-pressure" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #9C27B0; color: white; border: none; border-radius: 4px;">重置所有学生压力</button>
                     </div>
-                </div>
-                <div style="margin-top: 20px;">
-                    <button id="apply-game-changes" style="padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px;">应用更改</button>
                 </div>
             `;
         }
@@ -418,14 +410,7 @@
                 }
             });
 
-            // 保存游戏
-            this.panel.addEventListener('click', (e) =>
-            {
-                if (e.target.id === 'save-game')
-                {
-                    this.saveGame();
-                }
-            });
+            // 移除保存游戏按钮的事件监听，因为我们已经移除了保存按钮
 
         // 学生管理事件
         this.panel.addEventListener('click', (e) =>
@@ -442,6 +427,9 @@
             } else if (e.target.classList.contains('edit-talents'))
             {
                 this.showEditTalentsModal(parseInt(e.target.dataset.index));
+            } else if (e.target.classList.contains('edit-knowledge'))
+            {
+                this.showEditKnowledgeModal(parseInt(e.target.dataset.index));
             }
         });
 
@@ -472,20 +460,32 @@
                 {
                     game.budget = (game.budget || 0) + 10000;
                     this.updateGameFields();
+                    // 刷新游戏UI
+                    if (typeof window.renderAll === 'function') {
+                        window.renderAll();
+                    }
+                    this.showNotification('预算已增加 10,000');
                 } else if (e.target.id === 'add-reputation')
                 {
                     game.reputation = Math.min(100, (game.reputation || 0) + 10);
                     this.updateGameFields();
+                    // 刷新游戏UI
+                    if (typeof window.renderAll === 'function') {
+                        window.renderAll();
+                    }
+                    this.showNotification('声誉已增加 10');
                 } else if (e.target.id === 'next-week')
                 {
                     game.week = (game.week || 1) + 1;
                     this.updateGameFields();
+                    // 刷新游戏UI
+                    if (typeof window.renderAll === 'function') {
+                        window.renderAll();
+                    }
+                    this.showNotification('已进入下一周');
                 } else if (e.target.id === 'reset-pressure')
                 {
                     this.resetAllPressure();
-                } else if (e.target.id === 'apply-game-changes')
-                {
-                    this.applyGameChanges();
                 }
             });
 
@@ -911,6 +911,107 @@
             {
                 alert('命令执行失败: ' + error.message);
             }
+        }
+
+        // 显示编辑知识模态框
+        showEditKnowledgeModal(studentIndex)
+        {
+            const students = window.game?.students;
+            if (!students || !students[studentIndex]) return;
+
+            const student = students[studentIndex];
+            
+            // 定义知识类型和对应的中文名称
+            const knowledgeTypes = [
+                { key: 'knowledge_ds', label: '数据结构' },
+                { key: 'knowledge_graph', label: '图论' },
+                { key: 'knowledge_string', label: '字符串' },
+                { key: 'knowledge_math', label: '数学' },
+                { key: 'knowledge_dp', label: '动态规划' }
+            ];
+
+            // 创建知识编辑表单HTML
+            let knowledgeHTML = '';
+            knowledgeTypes.forEach(knowledge => {
+                const currentValue = student[knowledge.key] || 0;
+                knowledgeHTML += `
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; margin-bottom: 4px; font-weight: bold;">${knowledge.label}:</label>
+                        <input type="number" id="knowledge-${knowledge.key}" value="${Math.round(currentValue)}" 
+                               step="1" 
+                               style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                `;
+            });
+
+            const modalHTML = `
+                <div class="modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 8px; padding: 20px; max-width: 400px; max-height: 80vh; overflow-y: auto;">
+                        <h3 style="margin-top: 0;">编辑 ${student.name} 的知识</h3>
+                        <div style="margin-bottom: 16px;">
+                            ${knowledgeHTML}
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="save-knowledge" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px;">保存</button>
+                            <button id="cancel-knowledge" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px;">取消</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 创建模态框
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalHTML;
+            document.body.appendChild(modalContainer);
+
+            // 绑定事件
+            const saveBtn = modalContainer.querySelector('#save-knowledge');
+            const cancelBtn = modalContainer.querySelector('#cancel-knowledge');
+
+            saveBtn.onclick = () => {
+                // 获取所有知识输入值并更新学生数据
+                knowledgeTypes.forEach(knowledge => {
+                    const input = modalContainer.querySelector(`#knowledge-${knowledge.key}`);
+                    const newValue = parseInt(input.value) || 0;
+                    student[knowledge.key] = Math.max(0, Math.min(100, newValue)); // 限制在0-100范围
+                });
+
+                // 移除模态框
+                modalContainer.remove();
+                
+                // 刷新学生表格以更新视图
+                this.refreshStudents();
+                
+                // 刷新游戏UI（如果存在）
+                if (typeof window.renderAll === 'function') {
+                    window.renderAll();
+                }
+                
+                this.showNotification(`已更新 ${student.name} 的知识点`);
+            };
+
+            cancelBtn.onclick = () => {
+                modalContainer.remove();
+            };
+
+            // 点击背景关闭 - 修复拖动框选时误关闭的问题
+            const modalElement = modalContainer.querySelector('.modal');
+            modalElement.addEventListener('mousedown', (e) => {
+                // 只有点击背景（模态框本身）时才记录为可关闭
+                if (e.target === e.currentTarget) {
+                    modalElement._canClose = true;
+                } else {
+                    modalElement._canClose = false;
+                }
+            });
+
+            modalElement.addEventListener('mouseup', (e) => {
+                // 只有鼠标在背景上按下并在背景上释放时才关闭
+                if (e.target === e.currentTarget && modalElement._canClose) {
+                    modalContainer.remove();
+                }
+                modalElement._canClose = false;
+            });
         }
 
         // 显示编辑天赋模态框
