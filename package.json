@@ -1,0 +1,31 @@
+{
+  "name": "oi-trainer-electron",
+  "version": "1.0.0",
+  "description": "OI Trainer desktop application built with Electron and Bun",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder"
+  },
+  "keywords": ["electron", "oi", "trainer", "bun"],
+  "author": "Oracy",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.oracy.oi-trainer",
+    "productName": "OI Trainer",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist",
+      "!node_modules"
+    ]
+  }
+}
