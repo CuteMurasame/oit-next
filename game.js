@@ -1000,6 +1000,126 @@ function resignUI(){
   };
 }
 
+// 重置游戏功能
+function resetGameUI(){
+  // 获取重置前确认的设置
+  const promptBeforeReset = getResetPromptPreference();
+  
+  if(promptBeforeReset){
+    const modalHtml = `
+      <h3>⚠️ 确认重新开始</h3>
+      <div class="small" style="margin-top:12px; line-height:1.6;">
+        你确定要重新开始游戏吗？<br/>
+        这将使用当前配置（难度、省份、学生人数）生成全新的游戏。<br/>
+        <strong style="color: #e53e3e;">所有进度将被清除，包括：时间进度、经费、声誉、学生等。</strong><br/>
+        此操作无法撤销。
+      </div>
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="btn btn-ghost" id="reset-cancel">取消</button>
+        <button class="btn" id="reset-confirm" style="background: #e53e3e; border-color: #dc2626;">确认重新开始</button>
+      </div>`;
+
+    showModal(modalHtml);
+
+    const cancelBtn = document.getElementById('reset-cancel');
+    const confirmBtn = document.getElementById('reset-confirm');
+    
+    if(cancelBtn) cancelBtn.onclick = () => { 
+      try{ closeModal(); }catch(e){} 
+    };
+    
+    if(confirmBtn) confirmBtn.onclick = () => {
+      try{
+        closeModal();
+        performGameReset();
+      }catch(e){ 
+        console.error('reset confirm handler error', e); 
+      }
+    };
+  } else {
+    // 不提示，直接重置
+    performGameReset();
+  }
+}
+
+function performGameReset(){
+  try{
+    // 保存当前配置
+    const currentDiff = game.difficulty || 2;
+    const currentProv = game.province_id || 1;
+    const currentCount = game.students ? game.students.length : 5;
+    
+    log("开始重新生成游戏...");
+    
+    // 清除所有保存数据
+    try{ 
+      localStorage.removeItem('oi_coach_save'); 
+      sessionStorage.removeItem('oi_coach_save');
+      sessionStorage.removeItem('oi_coach_save_diag');
+    }catch(e){ console.warn('清除保存数据失败', e); }
+    
+    // 清除自动保存时间戳
+    try{
+      localStorage.removeItem('oi_coach_autosave_timestamp');
+    }catch(e){}
+    
+    // 清除结局原因
+    try{
+      sessionStorage.removeItem('oi_coach_ending_reason');
+      localStorage.removeItem('oi_coach_ending_reason');
+    }catch(e){}
+    
+    // 重新初始化游戏
+    if(typeof setRandomSeed === 'function'){
+      setRandomSeed(null); // 使用新的随机种子
+    }
+    initGame(currentDiff, currentProv, currentCount);
+    
+    // 保存新游戏状态
+    try{ localStorage.setItem('oi_coach_save', JSON.stringify(game)); }catch(e){}
+    
+    // 更新自动保存管理器引用
+    if(window.autoSaveManager){
+      window.autoSaveManager.setGameReference(game);
+    }
+    
+    // 重新渲染界面
+    renderAll();
+    
+    log("游戏已重新开始！");
+    pushEvent({
+      name: '游戏重置',
+      description: '教练决定重新开始，带领新的队伍征战赛场',
+      week: 1
+    });
+  }catch(e){
+    console.error('重置游戏失败:', e);
+    alert('重置游戏时发生错误，请刷新页面重试');
+  }
+}
+
+// 获取重置前确认设置
+function getResetPromptPreference(){
+  try{
+    const pref = localStorage.getItem('oi_coach_reset_prompt');
+    // 默认为 true（显示提示）
+    return pref === null ? true : pref === 'true';
+  }catch(e){
+    return true;
+  }
+}
+
+// 设置重置前确认偏好
+function setResetPromptPreference(value){
+  try{
+    localStorage.setItem('oi_coach_reset_prompt', value ? 'true' : 'false');
+    return true;
+  }catch(e){
+    console.error('设置重置提示偏好失败:', e);
+    return false;
+  }
+}
+
 function triggerGameEnding(reason) {
   try {
     game.seasonEndTriggered = true;
@@ -1482,6 +1602,18 @@ window.onload = ()=>{
       
       try{ localStorage.setItem('oi_coach_save', JSON.stringify(game)); }catch(e){}
       
+      // 移除 URL 中的 new=1 参数，以便自动保存能正常工作
+      try{
+        const url = new URL(window.location.href);
+        url.searchParams.delete('new');
+        url.searchParams.delete('daily');
+        url.searchParams.delete('seed');
+        url.searchParams.delete('d');
+        url.searchParams.delete('p');
+        url.searchParams.delete('c');
+        window.history.replaceState({}, '', url.toString());
+      }catch(e){ console.warn('无法更新URL', e); }
+      
       // 设置游戏状态引用
       if(window.autoSaveManager){
         window.autoSaveManager.setGameReference(game);
@@ -1518,6 +1650,12 @@ window.onload = ()=>{
     const settingsBtn = document.getElementById('autosave-settings-btn');
     if(settingsBtn && window.autoSaveManager){
       settingsBtn.onclick = ()=>{ window.autoSaveManager.showSettingsDialog(); };
+    }
+    
+    // 绑定重置游戏按钮
+    const resetBtn = document.getElementById('reset-game-btn');
+    if(resetBtn){
+      resetBtn.onclick = ()=>{ resetGameUI(); };
     }
     
     document.querySelectorAll('.btn.upgrade').forEach(b => {
