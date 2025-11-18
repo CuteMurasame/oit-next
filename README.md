@@ -1,6 +1,6 @@
 # OI-Trainer Next
 
-<https://oit.llong.tech>
+<https://t.akioi.me>
 
 添加了一些自定义的字段。
 
