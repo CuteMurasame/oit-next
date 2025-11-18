@@ -4,7 +4,11 @@
 // @version      1.0
 // @description  OI教练模拟器开发者工具，支持编辑学生属性、天赋、晋级状态、预算、声誉等
 // @author       Cline
-// @match        *://*/*
+// @match        *://t.akioi.me/*
+// @match        *://oit.oracynx.com/*
+// @match        *://oit-next.vercel.app/*
+// @match        *://seve42.github.io/*
+// @match        *://qoj.ac/files/*
 // @grant        none
 // ==/UserScript==
 
