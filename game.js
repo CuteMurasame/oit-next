@@ -1364,6 +1364,27 @@ function loadGame(){ try{
     game.completedCompetitions = new Set(Object.keys(o.completedCompetitions).filter(k => o.completedCompetitions[k]));
   }
   
+  // 恢复 qualification 中的 Set
+  if(o.qualification && typeof o.qualification === 'object'){
+    game.qualification = {};
+    for(const seasonIndex in o.qualification){
+      game.qualification[seasonIndex] = {};
+      const season = o.qualification[seasonIndex];
+      if(season && typeof season === 'object'){
+        for(const compName in season){
+          const qualData = season[compName];
+          if(Array.isArray(qualData)){
+            game.qualification[seasonIndex][compName] = new Set(qualData);
+          } else if(qualData && typeof qualData === 'object'){
+            game.qualification[seasonIndex][compName] = new Set(Object.keys(qualData).filter(k => qualData[k]));
+          } else {
+            game.qualification[seasonIndex][compName] = new Set();
+          }
+        }
+      }
+    }
+  }
+  
   // 恢复本周题目：如果存档中没有或已失效，重新选择
   if (!game.weeklyTasks || !Array.isArray(game.weeklyTasks) || game.weeklyTasks.length === 0) {
     if (typeof selectRandomTasks === 'function') {
@@ -1397,6 +1418,27 @@ function silentLoad(){ try{
     game.completedCompetitions = new Set(o.completedCompetitions);
   } else if(o.completedCompetitions && typeof o.completedCompetitions === 'object'){
     game.completedCompetitions = new Set(Object.keys(o.completedCompetitions).filter(k => o.completedCompetitions[k]));
+  }
+  
+  // 恢复 qualification 中的 Set
+  if(o.qualification && typeof o.qualification === 'object'){
+    game.qualification = {};
+    for(const seasonIndex in o.qualification){
+      game.qualification[seasonIndex] = {};
+      const season = o.qualification[seasonIndex];
+      if(season && typeof season === 'object'){
+        for(const compName in season){
+          const qualData = season[compName];
+          if(Array.isArray(qualData)){
+            game.qualification[seasonIndex][compName] = new Set(qualData);
+          } else if(qualData && typeof qualData === 'object'){
+            game.qualification[seasonIndex][compName] = new Set(Object.keys(qualData).filter(k => qualData[k]));
+          } else {
+            game.qualification[seasonIndex][compName] = new Set();
+          }
+        }
+      }
+    }
   }
   
   // 恢复本周题目：如果存档中没有或已失效，重新选择
