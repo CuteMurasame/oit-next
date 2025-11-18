@@ -184,28 +184,29 @@
     if(typeof window === 'undefined' || !window.TalentManager) return;
     const talents = window.TalentManager.getRegistered();
     talents.forEach(name => {
-      if (name == "__talent_cleanup__") continue;
-      const info = window.TalentManager.getTalentInfo(name) || {};
-      // populate hidden select
-      const opt = document.createElement('option'); opt.value = name; opt.textContent = name; hiddenSelect.appendChild(opt);
-
-      // create card
-      const card = document.createElement('div'); card.className = 'talent-card'; card.dataset.val = name;
-      const top = document.createElement('div');
-      const dot = document.createElement('span'); dot.className = 'color-dot'; dot.style.background = (info.color || '#2b6cb0');
-      const title = document.createElement('span'); title.className = 'title'; title.textContent = name;
-      top.appendChild(dot); top.appendChild(title);
-      const desc = document.createElement('div'); desc.className = 'desc'; desc.textContent = info.description || '';
-      card.appendChild(top); card.appendChild(desc);
-
-      card.addEventListener('click', ()=>{
-        // 单选高亮，仅用于展示/选择
-        grid.querySelectorAll('.talent-card.selected').forEach(c=>c.classList.remove('selected'));
-        card.classList.add('selected');
-        hiddenSelect.value = name;
-      });
-
-      grid.appendChild(card);
+      if (name !== "__talent_cleanup__") {
+        const info = window.TalentManager.getTalentInfo(name) || {};
+        // populate hidden select
+        const opt = document.createElement('option'); opt.value = name; opt.textContent = name; hiddenSelect.appendChild(opt);
+  
+        // create card
+        const card = document.createElement('div'); card.className = 'talent-card'; card.dataset.val = name;
+        const top = document.createElement('div');
+        const dot = document.createElement('span'); dot.className = 'color-dot'; dot.style.background = (info.color || '#2b6cb0');
+        const title = document.createElement('span'); title.className = 'title'; title.textContent = name;
+        top.appendChild(dot); top.appendChild(title);
+        const desc = document.createElement('div'); desc.className = 'desc'; desc.textContent = info.description || '';
+        card.appendChild(top); card.appendChild(desc);
+  
+        card.addEventListener('click', ()=>{
+          // 单选高亮，仅用于展示/选择
+          grid.querySelectorAll('.talent-card.selected').forEach(c=>c.classList.remove('selected'));
+          card.classList.add('selected');
+          hiddenSelect.value = name;
+        });
+  
+        grid.appendChild(card);
+      }
     });
   }
 
