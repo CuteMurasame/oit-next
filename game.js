@@ -1237,6 +1237,13 @@ function loadGame(){ try{
     return student;
   });
   
+  // 恢复 completedCompetitions Set
+  if(o.completedCompetitions && Array.isArray(o.completedCompetitions)){
+    game.completedCompetitions = new Set(o.completedCompetitions);
+  } else if(o.completedCompetitions && typeof o.completedCompetitions === 'object'){
+    game.completedCompetitions = new Set(Object.keys(o.completedCompetitions).filter(k => o.completedCompetitions[k]));
+  }
+  
   // 恢复本周题目：如果存档中没有或已失效，重新选择
   if (!game.weeklyTasks || !Array.isArray(game.weeklyTasks) || game.weeklyTasks.length === 0) {
     if (typeof selectRandomTasks === 'function') {
@@ -1250,7 +1257,27 @@ function silentLoad(){ try{
   let raw = null;
   try{ raw = sessionStorage.getItem('oi_coach_save'); }catch(e){ raw = null; }
   try{ if(!raw) raw = localStorage.getItem('oi_coach_save'); }catch(e){}
-  if(!raw) return false; let o = JSON.parse(raw); game = Object.assign(new GameState(), o); window.game = game; game.facilities = Object.assign(new Facilities(), o.facilities); game.students = (o.students || []).map(s => { const student = Object.assign(new Student(), s); if(s.talents && Array.isArray(s.talents)){ student.talents = new Set(s.talents); } else if(s.talents && typeof s.talents === 'object'){ student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k])); } return student; }); 
+  if(!raw) return false; 
+  let o = JSON.parse(raw); 
+  game = Object.assign(new GameState(), o); 
+  window.game = game; 
+  game.facilities = Object.assign(new Facilities(), o.facilities); 
+  game.students = (o.students || []).map(s => { 
+    const student = Object.assign(new Student(), s); 
+    if(s.talents && Array.isArray(s.talents)){ 
+      student.talents = new Set(s.talents); 
+    } else if(s.talents && typeof s.talents === 'object'){ 
+      student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k])); 
+    } 
+    return student; 
+  }); 
+  
+  // 恢复 completedCompetitions Set
+  if(o.completedCompetitions && Array.isArray(o.completedCompetitions)){
+    game.completedCompetitions = new Set(o.completedCompetitions);
+  } else if(o.completedCompetitions && typeof o.completedCompetitions === 'object'){
+    game.completedCompetitions = new Set(Object.keys(o.completedCompetitions).filter(k => o.completedCompetitions[k]));
+  }
   
   // 恢复本周题目：如果存档中没有或已失效，重新选择
   if (!game.weeklyTasks || !Array.isArray(game.weeklyTasks) || game.weeklyTasks.length === 0) {
@@ -1411,6 +1438,17 @@ window.onload = ()=>{
   }
   
   if(document.getElementById('action-train')){
+    // 初始化自动保存管理器
+    if(window.autoSaveManager){
+      window.autoSaveManager.setSaveCallback(saveGame);
+      window.autoSaveManager.setLoadCallback(() => {
+        const ok = silentLoad();
+        return ok;
+      });
+      window.autoSaveManager.setRenderCallback(renderAll);
+      window.autoSaveManager.init();
+    }
+    
     const qs = (function(){ try{ return new URLSearchParams(window.location.search); }catch(e){ return null; } })();
     if(qs && qs.get('new') === '1'){
       const diff = clampInt(parseInt(qs.get('d')||2),1,3);
@@ -1443,9 +1481,31 @@ window.onload = ()=>{
       }
       
       try{ localStorage.setItem('oi_coach_save', JSON.stringify(game)); }catch(e){}
+      
+      // 设置游戏状态引用
+      if(window.autoSaveManager){
+        window.autoSaveManager.setGameReference(game);
+      }
     } else {
-      const ok = silentLoad();
-      if(!ok){ window.location.href = 'start.html'; return; }
+      // 尝试使用自动保存恢复
+      if(window.autoSaveManager){
+        (async () => {
+          const restored = await window.autoSaveManager.handleRestore();
+          if(restored){
+            // 更新游戏状态引用
+            game = window.game;
+            window.autoSaveManager.setGameReference(game);
+          } else {
+            // 如果没有恢复成功，尝试普通加载
+            const ok = silentLoad();
+            if(!ok){ window.location.href = 'start.html'; return; }
+            window.autoSaveManager.setGameReference(game);
+          }
+        })();
+      } else {
+        const ok = silentLoad();
+        if(!ok){ window.location.href = 'start.html'; return; }
+      }
     }
     
     document.getElementById('action-train').onclick = ()=>{ trainStudentsUI(); };
@@ -1453,6 +1513,12 @@ window.onload = ()=>{
     document.getElementById('action-mock').onclick = ()=>{ holdMockContestUI(); };
     document.getElementById('action-outing').onclick = ()=>{ outingTrainingUI(); };
     document.getElementById('action-resign').onclick = ()=>{ resignUI(); };
+    
+    // 绑定自动保存设置按钮
+    const settingsBtn = document.getElementById('autosave-settings-btn');
+    if(settingsBtn && window.autoSaveManager){
+      settingsBtn.onclick = ()=>{ window.autoSaveManager.showSettingsDialog(); };
+    }
     
     document.querySelectorAll('.btn.upgrade').forEach(b => {
       b.onclick = (e) => {
