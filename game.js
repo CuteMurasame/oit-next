@@ -1237,6 +1237,13 @@ function loadGame(){ try{
     return student;
   });
   
+  // 恢复 completedCompetitions Set
+  if(o.completedCompetitions && Array.isArray(o.completedCompetitions)){
+    game.completedCompetitions = new Set(o.completedCompetitions);
+  } else if(o.completedCompetitions && typeof o.completedCompetitions === 'object'){
+    game.completedCompetitions = new Set(Object.keys(o.completedCompetitions).filter(k => o.completedCompetitions[k]));
+  }
+  
   // 恢复本周题目：如果存档中没有或已失效，重新选择
   if (!game.weeklyTasks || !Array.isArray(game.weeklyTasks) || game.weeklyTasks.length === 0) {
     if (typeof selectRandomTasks === 'function') {
@@ -1250,7 +1257,27 @@ function silentLoad(){ try{
   let raw = null;
   try{ raw = sessionStorage.getItem('oi_coach_save'); }catch(e){ raw = null; }
   try{ if(!raw) raw = localStorage.getItem('oi_coach_save'); }catch(e){}
-  if(!raw) return false; let o = JSON.parse(raw); game = Object.assign(new GameState(), o); window.game = game; game.facilities = Object.assign(new Facilities(), o.facilities); game.students = (o.students || []).map(s => { const student = Object.assign(new Student(), s); if(s.talents && Array.isArray(s.talents)){ student.talents = new Set(s.talents); } else if(s.talents && typeof s.talents === 'object'){ student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k])); } return student; }); 
+  if(!raw) return false; 
+  let o = JSON.parse(raw); 
+  game = Object.assign(new GameState(), o); 
+  window.game = game; 
+  game.facilities = Object.assign(new Facilities(), o.facilities); 
+  game.students = (o.students || []).map(s => { 
+    const student = Object.assign(new Student(), s); 
+    if(s.talents && Array.isArray(s.talents)){ 
+      student.talents = new Set(s.talents); 
+    } else if(s.talents && typeof s.talents === 'object'){ 
+      student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k])); 
+    } 
+    return student; 
+  }); 
+  
+  // 恢复 completedCompetitions Set
+  if(o.completedCompetitions && Array.isArray(o.completedCompetitions)){
+    game.completedCompetitions = new Set(o.completedCompetitions);
+  } else if(o.completedCompetitions && typeof o.completedCompetitions === 'object'){
+    game.completedCompetitions = new Set(Object.keys(o.completedCompetitions).filter(k => o.completedCompetitions[k]));
+  }
   
   // 恢复本周题目：如果存档中没有或已失效，重新选择
   if (!game.weeklyTasks || !Array.isArray(game.weeklyTasks) || game.weeklyTasks.length === 0) {
