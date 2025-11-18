@@ -1,14 +1,11 @@
-# OI-Trainer - CQYC Version
+# OI-Trainer Next
 
-<https://oit.oracynx.com>
+<https://oit.llong.tech>
 
-添加了一些 CQYC 选手的名称，以及一些自定义的字段。
-
-如果希望移除名字，可以通过 `oracynx@gmail.com` 或 <https://t.me/Oracynx> 取得联系。
+添加了一些自定义的字段。
 
 ## 具体的修改内容
 
-1. 以 CQYC 的选手作为名字选取的范围。
 2. 添加了天赋**原题机（真）**，在 NOI 系列比赛（除省选）中属性大大提升，但是有概率被发现，以及在 IOI 中有负面效果。
 3. 修复了天赋启用禁用顺序不正确导致的一系列问题。
 4. 允许身败名裂结局，更新结局的称号以及评论。
