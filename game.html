@@ -30,8 +30,9 @@
 <body>
 <div class="container">
   <header>
-    <div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
       <h1>OI 教练模拟器</h1>
+      <button id="autosave-settings-btn" class="btn" style="padding: 6px 12px; font-size: 13px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ 自动保存设置</button>
     </div>
     <div class="topline">
       <div id="header-week" class="small">第 1 周</div>
@@ -206,6 +207,7 @@
 <script src="lib/contest-ui.js"></script>
 <script src="lib/contest-integration.js"></script>
 <script src="lib/national-team.js"></script>
+<script src="lib/autosave.js"></script>
 <script src="./vendor/crypto-js.min.js"></script>
 <script src="game.js"></script>
 <script src="render.js"></script>
