@@ -1570,58 +1570,60 @@ window.onload = ()=>{
     }
     
     const qs = (function(){ try{ return new URLSearchParams(window.location.search); }catch(e){ return null; } })();
-    if(qs && qs.get('new') === '1'){
-      const diff = clampInt(parseInt(qs.get('d')||2),1,3);
-      const prov = clampInt(parseInt(qs.get('p')||1),1,Object.keys(PROVINCES).length);
-      const count = clampInt(parseInt(qs.get('c') || 5), 1, 32);
-      
-      const isDaily = qs.get('daily') === '1';
-      const seed = qs.get('seed') ? parseInt(qs.get('seed')) : null;
-      
-      if(isDaily && seed !== null){
-        if(typeof setRandomSeed === 'function'){
-          setRandomSeed(seed);
-          console.log(`[今日挑战] 种子已设置: ${seed}`);
+    
+    // 将初始化逻辑包装在异步函数中，以便正确等待游戏加载
+    (async () => {
+      if(qs && qs.get('new') === '1'){
+        const diff = clampInt(parseInt(qs.get('d')||2),1,3);
+        const prov = clampInt(parseInt(qs.get('p')||1),1,Object.keys(PROVINCES).length);
+        const count = clampInt(parseInt(qs.get('c') || 5), 1, 32);
+        
+        const isDaily = qs.get('daily') === '1';
+        const seed = qs.get('seed') ? parseInt(qs.get('seed')) : null;
+        
+        if(isDaily && seed !== null){
+          if(typeof setRandomSeed === 'function'){
+            setRandomSeed(seed);
+            console.log(`[今日挑战] 种子已设置: ${seed}`);
+          } else {
+            console.warn('[今日挑战] setRandomSeed 函数未定义，种子设置失败');
+          }
+          initGame(diff, prov, count);
+          game.isDailyChallenge = true;
+          game.dailyChallengeSeed = seed;
+          try{
+            const dailyDate = sessionStorage.getItem('oi_daily_challenge_date');
+            if(dailyDate) game.dailyChallengeDate = dailyDate;
+          }catch(e){}
+          console.log(`[今日挑战] 游戏初始化完成，省份: ${prov}, 种子: ${seed}`);
         } else {
-          console.warn('[今日挑战] setRandomSeed 函数未定义，种子设置失败');
+          if(typeof setRandomSeed === 'function'){
+            setRandomSeed(null);
+          }
+          initGame(diff, prov, count);
         }
-        initGame(diff, prov, count);
-        game.isDailyChallenge = true;
-        game.dailyChallengeSeed = seed;
+        
+        try{ localStorage.setItem('oi_coach_save', JSON.stringify(game)); }catch(e){}
+        
+        // 移除 URL 中的 new=1 参数，以便自动保存能正常工作
         try{
-          const dailyDate = sessionStorage.getItem('oi_daily_challenge_date');
-          if(dailyDate) game.dailyChallengeDate = dailyDate;
-        }catch(e){}
-        console.log(`[今日挑战] 游戏初始化完成，省份: ${prov}, 种子: ${seed}`);
-      } else {
-        if(typeof setRandomSeed === 'function'){
-          setRandomSeed(null);
+          const url = new URL(window.location.href);
+          url.searchParams.delete('new');
+          url.searchParams.delete('daily');
+          url.searchParams.delete('seed');
+          url.searchParams.delete('d');
+          url.searchParams.delete('p');
+          url.searchParams.delete('c');
+          window.history.replaceState({}, '', url.toString());
+        }catch(e){ console.warn('无法更新URL', e); }
+        
+        // 设置游戏状态引用
+        if(window.autoSaveManager){
+          window.autoSaveManager.setGameReference(game);
         }
-        initGame(diff, prov, count);
-      }
-      
-      try{ localStorage.setItem('oi_coach_save', JSON.stringify(game)); }catch(e){}
-      
-      // 移除 URL 中的 new=1 参数，以便自动保存能正常工作
-      try{
-        const url = new URL(window.location.href);
-        url.searchParams.delete('new');
-        url.searchParams.delete('daily');
-        url.searchParams.delete('seed');
-        url.searchParams.delete('d');
-        url.searchParams.delete('p');
-        url.searchParams.delete('c');
-        window.history.replaceState({}, '', url.toString());
-      }catch(e){ console.warn('无法更新URL', e); }
-      
-      // 设置游戏状态引用
-      if(window.autoSaveManager){
-        window.autoSaveManager.setGameReference(game);
-      }
-    } else {
-      // 尝试使用自动保存恢复
-      if(window.autoSaveManager){
-        (async () => {
+      } else {
+        // 尝试使用自动保存恢复
+        if(window.autoSaveManager){
           const restored = await window.autoSaveManager.handleRestore();
           if(restored){
             // 更新游戏状态引用
@@ -1633,52 +1635,53 @@ window.onload = ()=>{
             if(!ok){ window.location.href = 'start.html'; return; }
             window.autoSaveManager.setGameReference(game);
           }
-        })();
-      } else {
-        const ok = silentLoad();
-        if(!ok){ window.location.href = 'start.html'; return; }
+        } else {
+          const ok = silentLoad();
+          if(!ok){ window.location.href = 'start.html'; return; }
+        }
       }
-    }
-    
-    document.getElementById('action-train').onclick = ()=>{ trainStudentsUI(); };
-    document.getElementById('action-entertain').onclick = ()=>{ entertainmentUI(); };
-    document.getElementById('action-mock').onclick = ()=>{ holdMockContestUI(); };
-    document.getElementById('action-outing').onclick = ()=>{ outingTrainingUI(); };
-    document.getElementById('action-resign').onclick = ()=>{ resignUI(); };
-    
-    // 绑定自动保存设置按钮
-    const settingsBtn = document.getElementById('autosave-settings-btn');
-    if(settingsBtn && window.autoSaveManager){
-      settingsBtn.onclick = ()=>{ window.autoSaveManager.showSettingsDialog(); };
-    }
-    
-    // 绑定重置游戏按钮
-    const resetBtn = document.getElementById('reset-game-btn');
-    if(resetBtn){
-      resetBtn.onclick = ()=>{ resetGameUI(); };
-    }
-    
-    document.querySelectorAll('.btn.upgrade').forEach(b => {
-      b.onclick = (e) => {
-        const fac = b.dataset.fac;
-        if(fac) upgradeFacility(fac);
-      };
-    });
-    const actionEvictBtn = document.getElementById('action-evict');
-    if(actionEvictBtn) actionEvictBtn.onclick = ()=>{ evictStudentUI(); };
-    
-    // 暴露设施升级界面函数到全局作用域
-    window.showFacilityUpgradeModal = showFacilityUpgradeModal;
-    // 暴露压力预计算函数到全局作用域
-    window.calculateTrainingPressure = calculateTrainingPressure;
-    
-    renderAll();
-    
-    if (qs && qs.get('new') === '1' && window.tutorialManager) {
-      setTimeout(() => {
-        window.tutorialManager.start();
-      }, 500);
-    }
+      
+      // 设置UI元素事件处理器 - 现在在游戏加载完成后执行
+      document.getElementById('action-train').onclick = ()=>{ trainStudentsUI(); };
+      document.getElementById('action-entertain').onclick = ()=>{ entertainmentUI(); };
+      document.getElementById('action-mock').onclick = ()=>{ holdMockContestUI(); };
+      document.getElementById('action-outing').onclick = ()=>{ outingTrainingUI(); };
+      document.getElementById('action-resign').onclick = ()=>{ resignUI(); };
+      
+      // 绑定自动保存设置按钮
+      const settingsBtn = document.getElementById('autosave-settings-btn');
+      if(settingsBtn && window.autoSaveManager){
+        settingsBtn.onclick = ()=>{ window.autoSaveManager.showSettingsDialog(); };
+      }
+      
+      // 绑定重置游戏按钮
+      const resetBtn = document.getElementById('reset-game-btn');
+      if(resetBtn){
+        resetBtn.onclick = ()=>{ resetGameUI(); };
+      }
+      
+      document.querySelectorAll('.btn.upgrade').forEach(b => {
+        b.onclick = (e) => {
+          const fac = b.dataset.fac;
+          if(fac) upgradeFacility(fac);
+        };
+      });
+      const actionEvictBtn = document.getElementById('action-evict');
+      if(actionEvictBtn) actionEvictBtn.onclick = ()=>{ evictStudentUI(); };
+      
+      // 暴露设施升级界面函数到全局作用域
+      window.showFacilityUpgradeModal = showFacilityUpgradeModal;
+      // 暴露压力预计算函数到全局作用域
+      window.calculateTrainingPressure = calculateTrainingPressure;
+      
+      renderAll();
+      
+      if (qs && qs.get('new') === '1' && window.tutorialManager) {
+        setTimeout(() => {
+          window.tutorialManager.start();
+        }, 500);
+      }
+    })();
   } else {
     // not index page: do nothing. start.html will call renderStartPageUI; end.html will call renderEndSummary.
   }
