@@ -184,6 +184,7 @@
     if(typeof window === 'undefined' || !window.TalentManager) return;
     const talents = window.TalentManager.getRegistered();
     talents.forEach(name => {
+      if (name == "__talent_cleanup__") continue;
       const info = window.TalentManager.getTalentInfo(name) || {};
       // populate hidden select
       const opt = document.createElement('option'); opt.value = name; opt.textContent = name; hiddenSelect.appendChild(opt);
