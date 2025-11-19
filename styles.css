@@ -76,6 +76,7 @@ input[type="number"], select, input[type="text"]{width:100%;padding:6px;border:1
 .prov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:4px}
 .prov-btn{background:var(--accent);color:#fff;border:none;padding:5px 6px;border-radius:4px;cursor:pointer;display:block;text-align:center;white-space:normal}
 .prov-btn.selected{background:#fff;color:var(--accent);border:2px solid rgba(43,108,176,0.18);box-shadow:0 4px 14px rgba(43,108,176,0.06);}
+.prov-btn-noeffect{border:none;padding:5px 6px;border-radius:4px;cursor:pointer;display:block;text-align:center;white-space:normal}
 /* option card (used in entertainment modal) */
 .option-card{transition:all 180ms ease;border:1px solid #e6e6e6;background:#fff}
 .option-card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.04)}
