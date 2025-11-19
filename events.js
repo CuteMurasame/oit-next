@@ -28,7 +28,7 @@
         description: '沿海省份夏秋季台风，影响舒适度/压力/经费',
         check: c => {
           // 规范化省份名称：支持 numeric id、去除常见后缀（省/市/自治区/特别行政区）并去除首尾空格
-          const coastal = ["广东","浙江","上海","福建","江苏","山东","辽宁","海南","天津"];
+          const coastal = ["广东","浙江","上海","福建","江苏","山东","辽宁","海南","天津","台湾"];
           let prov = c.game.province_name;
           if (typeof prov === 'number' && c.PROVINCES && c.PROVINCES[prov]) prov = c.PROVINCES[prov].name;
           prov = (prov || '') + '';
