@@ -1182,7 +1182,22 @@ function initGameUI(){
     <label class="block">学生人数 (1-32)</label><input id="init-stu" type="number" min="1" max="32" value="5" />
   <div class="modal-actions" style="margin-top:8px"><button class="btn btn-ghost" onclick="closeModal()">取消</button><button class="btn" id="init-start">开始</button></div>`);
   let grid = document.getElementById('init-prov-grid');
-  for(let k in PROVINCES){ let p=PROVINCES[k]; let btn=document.createElement('button'); btn.className='prov-btn'; btn.textContent=p.name; btn.dataset.val=k; btn.onclick=()=>{document.querySelectorAll('#init-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');}; grid.appendChild(btn);}  
+  for(let k in PROVINCES){
+      let p=PROVINCES[k];
+      let btn=document.createElement('button');
+      btn.className='prov-btn';
+      if(p.name=="台湾"){
+          btn.className='prov-btn glowing-gold';
+          p.name+="（公测）"
+      }
+      btn.textContent=p.name;
+      btn.dataset.val=k;
+      btn.onclick=()=>{
+          document.querySelectorAll('#init-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));
+          btn.classList.add('selected');
+      };
+      grid.appendChild(btn);
+  }  
   if(grid.firstChild) grid.firstChild.classList.add('selected');
   $('init-start').onclick = ()=>{
     let diff = parseInt($('init-diff').value);
