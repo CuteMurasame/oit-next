@@ -1186,7 +1186,6 @@ function initGameUI(){
       let p=PROVINCES[k];
       let btn=document.createElement('button');
       btn.className='prov-btn';
-      console.log(p);
       if(p.name.trim()=="台湾"){
           btn.className='prov-btn noeffect glowing-gold';
           p.name+="（公测）";
@@ -1195,7 +1194,6 @@ function initGameUI(){
       btn.dataset.val=k;
       btn.onclick=()=>{
           document.querySelectorAll('#init-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));
-          console.log("Removing selected effect");
           btn.classList.add('selected');
       };
       grid.appendChild(btn);
@@ -1219,7 +1217,6 @@ function renderStartPageUI(){
       let p=PROVINCES[k];
       let btn=document.createElement('button');
       btn.className='prov-btn';
-      console.log(p);
       if(p.name.trim()=="台湾"){
           btn.className='prov-btn noeffect glowing-gold';
           p.name+="（公测）";
@@ -1227,7 +1224,7 @@ function renderStartPageUI(){
       btn.textContent=p.name;
       btn.dataset.val=k;
       btn.onclick=()=>{
-          document.querySelectorAll('#init-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));
+          document.querySelectorAll('#start-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));
           btn.classList.add('selected');
       };
       grid.appendChild(btn);
