@@ -1189,7 +1189,7 @@ function initGameUI(){
       console.log(p);
       if(p.name.trim()=="台湾"){
           btn.className='prov-btn noeffect glowing-gold';
-          p.name+="（公测）"
+          p.name+="（公测）";
       }
       btn.textContent=p.name;
       btn.dataset.val=k;
@@ -1221,7 +1221,7 @@ function renderStartPageUI(){
       console.log(p);
       if(p.name.trim()=="台湾"){
           btn.className='prov-btn noeffect glowing-gold';
-          p.name+="（公测）"
+          p.name+="（公测）";
       }
       btn.textContent=p.name;
       btn.dataset.val=k;
