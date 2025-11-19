@@ -25,8 +25,10 @@ function getStudentQualificationStatus(student) {
     const currentHalf = (game.week > (typeof WEEKS_PER_HALF !== 'undefined' ? WEEKS_PER_HALF : 16)) ? 1 : 0;
     
     // 获取所有比赛，按周数排序
-    const sortedComps = (typeof competitions !== 'undefined' && Array.isArray(competitions)) 
-      ? competitions.slice().sort((a, b) => a.week - b.week) 
+    // 优先使用 window.competitions，因为它会在 Taiwan 模式下被正确更新
+    const comps = (typeof window !== 'undefined' && window.competitions) || competitions;
+    const sortedComps = (Array.isArray(comps)) 
+      ? comps.slice().sort((a, b) => a.week - b.week) 
       : [];
     
     // 找到下一场未进行的比赛
