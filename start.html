@@ -356,8 +356,8 @@
           const btn = e.target.closest('.prov-btn');
           if (btn) {
             const provId = parseInt(btn.dataset.val);
-            // 香港(14)和澳门(25)使用繁体中文
-            if (provId === 14 || provId === 25) {
+            // 香港 (14)、澳门 (25) 和台湾 (34) 使用繁体中文
+            if (provId === 14 || provId === 25 || provID === 34) {
               window.ChineseConverter.setUseTraditionalChinese(true);
               // 延迟转换，确保DOM更新完成
               setTimeout(() => {
