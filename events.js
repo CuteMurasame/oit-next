@@ -1264,6 +1264,43 @@
         fallbackPush(text || '(empty)');
       });
       
+      // 台湾TOI特色事件：师大集训
+      this.register({
+        id: 'taiwan_toi_training',
+        name: 'TOI集训营',
+        description: '台湾TOI体系的选训营，高强度集训',
+        check: c => {
+          if (!(c.game && c.game.province_type === '台湾')) return false;
+          // 在第20-24周期间（选训营和复选期间）有一定概率触发
+          const w = c.game.week;
+          if (w >= 20 && w <= 24 && getRandom() < 0.15) return true;
+          return false;
+        },
+        run: c => {
+          // 选训营期间学生压力增加，但思维和编程能力也会提升
+          let affectedCount = 0;
+          for(let s of c.game.students){
+            if(!s || s.active === false) continue;
+            s.pressure_modifier = (s.pressure_modifier || 0) + 8;
+            // 提升思维和编程能力
+            const thinkingGain = c.utils.uniform(2, 4);
+            const codingGain = c.utils.uniform(2, 4);
+            try{
+              if(typeof s.addThinking === 'function') s.addThinking(thinkingGain);
+              else s.thinking = Math.min(400, (s.thinking || 0) + thinkingGain);
+              if(typeof s.addCoding === 'function') s.addCoding(codingGain);
+              else s.coding = Math.min(400, (s.coding || 0) + codingGain);
+            }catch(e){}
+            affectedCount++;
+          }
+          
+          const msg = `台师大承办的TOI选训营正在进行，高强度训练让学生们思维和编程能力都有所提升（压力 +8）`;
+          c.log && c.log(`[TOI集训营] ${msg}`);
+          window.pushEvent && window.pushEvent({ name: 'TOI集训营', description: msg, week: c.game.week });
+          return null;
+        }
+      });
+      
     },
 
     // 主调度：逐个事件执行 check/run
