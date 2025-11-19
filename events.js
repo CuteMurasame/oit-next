@@ -28,7 +28,7 @@
         description: '沿海省份夏秋季台风，影响舒适度/压力/经费',
         check: c => {
           // 规范化省份名称：支持 numeric id、去除常见后缀（省/市/自治区/特别行政区）并去除首尾空格
-          const coastal = ["广东","浙江","上海","福建","江苏","山东","辽宁","海南","天津"];
+          const coastal = ["广东","浙江","上海","福建","江苏","山东","辽宁","海南","天津","台湾"];
           let prov = c.game.province_name;
           if (typeof prov === 'number' && c.PROVINCES && c.PROVINCES[prov]) prov = c.PROVINCES[prov].name;
           prov = (prov || '') + '';
@@ -1262,6 +1262,43 @@
         // 未匹配：正常记录并展示训话事件卡片
         console.debug('[coach-speech] no match; pushing normal event');
         fallbackPush(text || '(empty)');
+      });
+      
+      // 台湾TOI特色事件：师大集训
+      this.register({
+        id: 'taiwan_toi_training',
+        name: 'TOI集训营',
+        description: '台湾TOI体系的选训营，高强度集训',
+        check: c => {
+          if (!(c.game && c.game.province_type === '台湾')) return false;
+          // 在第20-24周期间（选训营和复选期间）有一定概率触发
+          const w = c.game.week;
+          if (w >= 20 && w <= 24 && getRandom() < 0.15) return true;
+          return false;
+        },
+        run: c => {
+          // 选训营期间学生压力增加，但思维和编程能力也会提升
+          let affectedCount = 0;
+          for(let s of c.game.students){
+            if(!s || s.active === false) continue;
+            s.pressure_modifier = (s.pressure_modifier || 0) + 8;
+            // 提升思维和编程能力
+            const thinkingGain = c.utils.uniform(2, 4);
+            const codingGain = c.utils.uniform(2, 4);
+            try{
+              if(typeof s.addThinking === 'function') s.addThinking(thinkingGain);
+              else s.thinking = Math.min(400, (s.thinking || 0) + thinkingGain);
+              if(typeof s.addCoding === 'function') s.addCoding(codingGain);
+              else s.coding = Math.min(400, (s.coding || 0) + codingGain);
+            }catch(e){}
+            affectedCount++;
+          }
+          
+          const msg = `台师大承办的TOI选训营正在进行，高强度训练让学生们思维和编程能力都有所提升（压力 +8）`;
+          c.log && c.log(`[TOI集训营] ${msg}`);
+          window.pushEvent && window.pushEvent({ name: 'TOI集训营', description: msg, week: c.game.week });
+          return null;
+        }
       });
       
     },
