@@ -1195,6 +1195,7 @@ function initGameUI(){
       btn.dataset.val=k;
       btn.onclick=()=>{
           document.querySelectorAll('#init-prov-grid .prov-btn').forEach(b=>b.classList.remove('selected'));
+          console.log("Removing selected effect");
           btn.classList.add('selected');
       };
       grid.appendChild(btn);
