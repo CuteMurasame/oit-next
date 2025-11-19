@@ -480,6 +480,9 @@ function computeOutingCostQuadratic(difficulty_choice, province_choice, particip
     adjustedBase = Math.floor(adjustedBase * STRONG_PROVINCE_COST_MULTIPLIER);
   } else if (target.type === '弱省') {
     adjustedBase = Math.floor(adjustedBase * WEAK_PROVINCE_COST_MULTIPLIER);
+  } else if (target.type === '台湾') {
+    // 台湾的集训成本介于强省和普通省之间
+    adjustedBase = Math.floor(adjustedBase * 1.15);
   }
 
   const n = Math.max(0, Number(participantCount || 0));
@@ -1475,14 +1478,30 @@ function initGame(difficulty, province_choice, student_count){
   game.province_name = prov.name; game.province_type = prov.type; game.is_north = prov.isNorth; game.budget = prov.baseBudget; game.base_comfort = prov.isNorth?BASE_COMFORT_NORTH:BASE_COMFORT_SOUTH;
   try{ game.province_climate = prov.climate || null; }catch(e){ game.province_climate = null; }
   
-  // 如果选择香港(14)或澳门(25)，设置使用繁体中文
-  if (province_choice === 14 || province_choice === 25) {
+  // 如果选择台湾(34)、香港(14)或澳门(25)，设置使用繁体中文
+  if (province_choice === 34 || province_choice === 14 || province_choice === 25) {
     try {
       if (window.ChineseConverter) {
         window.ChineseConverter.setUseTraditionalChinese(true);
       }
     } catch (e) {
       console.error('设置繁体中文失败:', e);
+    }
+  }
+  
+  // 如果选择台湾，初始化台湾专用的比赛日程和晋级体系
+  if (game.province_type === "台湾") {
+    try {
+      if (typeof initCompetitionsForProvince === 'function') {
+        window.competitions = initCompetitionsForProvince("台湾");
+        console.log('[Taiwan] 已加载台湾TOI比赛日程:', window.competitions);
+      }
+      if (typeof game.initQualificationForProvince === 'function') {
+        game.initQualificationForProvince("台湾");
+        console.log('[Taiwan] 已初始化台湾TOI晋级体系');
+      }
+    } catch (e) {
+      console.error('初始化台湾比赛体系失败:', e);
     }
   }
   
@@ -1509,6 +1528,7 @@ function initGame(difficulty, province_choice, student_count){
   let min_val,max_val;
   if(game.province_type==="强省"){ min_val = STRONG_PROVINCE_MIN_ABILITY; max_val = STRONG_PROVINCE_MAX_ABILITY; }
   else if(game.province_type==="弱省"){ min_val = WEAK_PROVINCE_MIN_ABILITY; max_val = WEAK_PROVINCE_MAX_ABILITY; }
+  else if(game.province_type==="台湾"){ min_val = TAIWAN_MIN_ABILITY; max_val = TAIWAN_MAX_ABILITY; }
   else { min_val = NORMAL_PROVINCE_MIN_ABILITY; max_val = NORMAL_PROVINCE_MAX_ABILITY; }
   if(game.difficulty===1){ min_val += EASY_MODE_ABILITY_BONUS; max_val += EASY_MODE_ABILITY_BONUS; }
   else if(game.difficulty===3){ min_val -= HARD_MODE_ABILITY_PENALTY; max_val -= HARD_MODE_ABILITY_PENALTY; }
