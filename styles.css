@@ -1,3 +1,36 @@
+.glowing-gold {
+	color: white;
+	background: linear-gradient(135deg,
+			rgba(255, 215, 0, 1) 43%,
+			rgba(255, 215, 0, 0.3) 50%,
+			rgba(255, 215, 0, 1) 57%);
+	animation: glowing-background 3s ease-in-out infinite;
+	background-size: 250% 250%;
+	box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+	transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
+}
+
+.glowing-gold:hover {
+	color: white;
+	background: linear-gradient(135deg,
+			rgb(245, 208, 0) 43%,
+			rgba(245, 208, 0, 0.3) 50%,
+			rgb(245, 208, 0) 57%);
+	animation: glowing-background 3s ease-in-out infinite;
+	background-size: 250% 250%;
+	box-shadow: 0 0 30px rgba(245, 208, 0, 0.8);
+	transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
+}
+
+@keyframes glowing-background {
+	0% {
+		background-position: 0% 0%;
+	}
+	100% {
+		background-position: 100% 100%;
+	}
+}
+
 :root{--bg:#f7f7f8;--card:#ffffff;--muted:#666;--accent:#2b6cb0}
 /* 全局允许横向滚动以避免在极窄视口下布局被强制换行/错位。
    同时保留 .prevent-horizontal-collapse 作为可选类（向后兼容）。 */
