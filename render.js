@@ -1186,6 +1186,7 @@ function initGameUI(){
       let p=PROVINCES[k];
       let btn=document.createElement('button');
       btn.className='prov-btn';
+      console.log(p);
       if(p.name.trim()=="台湾"){
           btn.className='prov-btn glowing-gold';
           p.name+="（公测）"
