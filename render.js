@@ -25,8 +25,10 @@ function getStudentQualificationStatus(student) {
     const currentHalf = (game.week > (typeof WEEKS_PER_HALF !== 'undefined' ? WEEKS_PER_HALF : 16)) ? 1 : 0;
     
     // 获取所有比赛，按周数排序
-    const sortedComps = (typeof competitions !== 'undefined' && Array.isArray(competitions)) 
-      ? competitions.slice().sort((a, b) => a.week - b.week) 
+    // 优先使用 window.competitions，因为它会在 Taiwan 模式下被正确更新
+    const comps = (typeof window !== 'undefined' && window.competitions) || competitions;
+    const sortedComps = (Array.isArray(comps)) 
+      ? comps.slice().sort((a, b) => a.week - b.week) 
       : [];
     
     // 找到下一场未进行的比赛
@@ -49,15 +51,28 @@ function getStudentQualificationStatus(student) {
     result.nextContest = nextComp.name;
     
     // 检查学生是否已经晋级下一场比赛
-    // CSP-S1 不需要晋级资格，所有人都可以参加
-    if (nextComp.name === 'CSP-S1') {
+    // 根据省份类型使用不同的晋级链
+    const isTaiwanProvince = game.province_type === "台湾";
+    
+    // 第一场比赛不需要晋级资格，所有人都可以参加
+    // 大陆: CSP-S1, 台湾: TOI海选
+    if (nextComp.name === 'CSP-S1' || nextComp.name === 'TOI海选') {
       result.hasQualification = true;
-      result.html = '<span class="qualification-badge qualified" title="所有学生均可参加CSP-S1">✓</span>';
+      const contestName = nextComp.name;
+      result.html = `<span class="qualification-badge qualified" title="所有学生均可参加${contestName}">✓</span>`;
       return result;
     }
     
-    // 检查晋级链：CSP-S1 -> CSP-S2 -> NOIP -> 省选 -> NOI
-    const qualChain = {
+    // 定义晋级链
+    // 大陆: CSP-S1 -> CSP-S2 -> NOIP -> 省选 -> NOI
+    // 台湾: TOI海选 -> TOI初选 -> TOI选训营 -> TOI复选 -> TOI决选 -> IOI
+    const qualChain = isTaiwanProvince ? {
+      'TOI初选': 'TOI海选',
+      'TOI选训营': 'TOI初选',
+      'TOI复选': 'TOI选训营',
+      'TOI决选': 'TOI复选',
+      'IOI': 'TOI决选'
+    } : {
       'CSP-S2': 'CSP-S1',
       'NOIP': 'CSP-S2',
       '省选': 'NOIP',
