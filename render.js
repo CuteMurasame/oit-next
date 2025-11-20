@@ -594,7 +594,7 @@ function renderAll(){
   }catch(e){ /* ignore UI assist failures */ }
 
   let compNow = null;
-  const sortedComps = Array.isArray(competitions) ? competitions.slice().sort((a,b)=>a.week - b.week) : [];
+  const sortedComps = Array.isArray(window.competitions) ? window.competitions.slice().sort((a,b)=>a.week - b.week) : [];
   for (let comp of sortedComps) {
     if (comp.week === currWeek()) {
       const half = (currWeek() > WEEKS_PER_HALF) ? 1 : 0;
