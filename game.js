@@ -788,32 +788,50 @@ function weeklyUpdate(weeks=1){
           // 找到所有晋级链断裂的学生
           const qualificationLostStudents = [];
           
-          for(let i = game.students.length - 1; i >= 0; i--){
-            const s = game.students[i];
-            if(!s || s.active === false) continue;
-            
-            // 获取学生的晋级状态
-            let hasQualification = false;
-            try{
-              if(typeof getStudentQualificationStatus === 'function'){
-                const qualInfo = getStudentQualificationStatus(s);
-                hasQualification = qualInfo.hasQualification;
-                
-                // 特殊处理：如果已经没有下一场比赛了（所有比赛都完成），则认为有晋级资格
-                if(!qualInfo.nextContest || qualInfo.nextContest === ''){
-                  hasQualification = true;
+          // 检查是否刚结束一场比赛（给1周缓冲期让资格数据稳定）
+          const justFinishedComp = Array.isArray(competitions) && competitions.some(c => c.week === game.week - 1 && c.week > WEEKS_PER_HALF);
+          if(justFinishedComp){
+            console.log('[晋级链检查] 刚结束比赛，跳过本周资格检查以避免时序问题');
+          } else {
+            for(let i = game.students.length - 1; i >= 0; i--){
+              const s = game.students[i];
+              if(!s || s.active === false) continue;
+              
+              // 获取学生的晋级状态
+              let hasQualification = false;
+              try{
+                if(typeof getStudentQualificationStatus === 'function'){
+                  const qualInfo = getStudentQualificationStatus(s);
+                  hasQualification = qualInfo.hasQualification;
+                  
+                  // 特殊处理：如果已经没有下一场比赛了（所有比赛都完成），则认为有晋级资格
+                  if(!qualInfo.nextContest || qualInfo.nextContest === ''){
+                    hasQualification = true;
+                  }
+                  
+                  // 额外安全检查：如果学生在当前赛季有任何晋级记录，给予信任
+                  if(!hasQualification && game.qualification && game.qualification[currentHalf]){
+                    for(const compName in game.qualification[currentHalf]){
+                      if(game.qualification[currentHalf][compName] && game.qualification[currentHalf][compName].has(s.name)){
+                        console.log(`[晋级链检查] ${s.name} 在本赛季有晋级记录(${compName})，保留`);
+                        hasQualification = true;
+                        break;
+                      }
+                    }
+                  }
                 }
+              }catch(e){ 
+                console.error('检查晋级资格失败:', e); 
+                hasQualification = true; // 出错时保守处理，不退队
               }
-            }catch(e){ 
-              console.error('检查晋级资格失败:', e); 
-              hasQualification = true; // 出错时保守处理，不退队
-            }
-            
-            // 如果学生没有晋级资格，自动退队
-            if(!hasQualification){
-              qualificationLostStudents.push(s.name);
-              game.students.splice(i, 1);
-              try{ if(typeof s.triggerTalents === 'function'){ s.triggerTalents('quit', { reason: 'qualification_lost' }); } }catch(e){}
+              
+              // 如果学生没有晋级资格，自动退队
+              if(!hasQualification){
+                console.log(`[晋级链检查] ${s.name} 无晋级资格，将被移除`);
+                qualificationLostStudents.push(s.name);
+                game.students.splice(i, 1);
+                try{ if(typeof s.triggerTalents === 'function'){ s.triggerTalents('quit', { reason: 'qualification_lost' }); } }catch(e){}
+              }
             }
           }
           
@@ -949,6 +967,14 @@ function normalizeEndingReason(raw) {
     
     if(s === 'AKIOI' || s === '👑 AKIOI') return 'AKIOI';
     if(s === '顶尖结局' || s === '🌟 顶尖结局') return '顶尖结局';
+    
+    // 台湾IOI特殊结局
+    if(s.includes('台湾IOI双金')) return '台湾IOI双金';
+    if(s.includes('台湾IOI金牌')) return '台湾IOI金牌';
+    if(s.includes('台湾IOI多牌')) return '台湾IOI多牌';
+    if(s.includes('台湾IOI奖牌')) return '台湾IOI奖牌';
+    if(s.includes('台湾IOI无奖牌')) return '台湾IOI无奖牌';
+    if(s.includes('台湾IOI')) return '台湾IOI结束';
     
     const low = s.toLowerCase();
     if(low.includes('akioi')) return 'AKIOI';
