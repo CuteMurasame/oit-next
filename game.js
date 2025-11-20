@@ -968,6 +968,14 @@ function normalizeEndingReason(raw) {
     if(s === 'AKIOI' || s === '👑 AKIOI') return 'AKIOI';
     if(s === '顶尖结局' || s === '🌟 顶尖结局') return '顶尖结局';
     
+    // 台湾IOI特殊结局
+    if(s.includes('台湾IOI双金')) return '台湾IOI双金';
+    if(s.includes('台湾IOI金牌')) return '台湾IOI金牌';
+    if(s.includes('台湾IOI多牌')) return '台湾IOI多牌';
+    if(s.includes('台湾IOI奖牌')) return '台湾IOI奖牌';
+    if(s.includes('台湾IOI无奖牌')) return '台湾IOI无奖牌';
+    if(s.includes('台湾IOI')) return '台湾IOI结束';
+    
     const low = s.toLowerCase();
     if(low.includes('akioi')) return 'AKIOI';
     if(low.includes('顶尖')) return '顶尖结局';
