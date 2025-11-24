@@ -113,7 +113,19 @@
 <script src="render.js"></script>
 <script src="debug.js"></script>
 <script>
-  document.getElementById('end-back').onclick = ()=>{ window.location.href = 'start.html'; };
+  document.getElementById('end-back').onclick = ()=>{ 
+    // 清理自动保存数据
+    try{
+      localStorage.removeItem('oi_coach_save'); 
+      localStorage.removeItem('oi_coach_ending_reason');
+      localStorage.removeItem('oi_coach_ending');
+      localStorage.removeItem('oi_coach_autosave_timestamp');
+      console.debug('localStorage cleanup executed: autosave data cleared');
+    }catch(e){ 
+      console.error('Failed to clear localStorage:', e);
+    }
+    window.location.href = 'start.html'; 
+  };
   document.getElementById('end-playagain').onclick = ()=>{ 
     try{
       // 调试弹窗：在清理前显示当前 localStorage 中相关键的值（或其存在性）和调用堆栈，帮助定位是否被误清空
@@ -124,10 +136,11 @@
       };
   console.debug('About to clear localStorage keys: oi_coach_save, oi_coach_ending_reason, oi_coach_ending; current:', before);
     }catch(e){ /* ignore in case alerts break automated tests */ }
-    // 清理所有相关的localStorage数据
+    // 清理所有相关的localStorage数据（包括自动保存时间戳）
     localStorage.removeItem('oi_coach_save'); 
     localStorage.removeItem('oi_coach_ending_reason');
     localStorage.removeItem('oi_coach_ending');
+    localStorage.removeItem('oi_coach_autosave_timestamp');
   try{ console.debug('localStorage cleanup executed for oi_coach_save and related keys'); }catch(e){}
     window.location.href = 'start.html'; 
   };
